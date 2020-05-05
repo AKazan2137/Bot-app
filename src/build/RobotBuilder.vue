@@ -29,11 +29,11 @@
     </div>
     <div class="middle-row">
       <PartSelector :parts="availableParts.arms" position="left"
-      @partSelected="part => selectedRobot.leftArms=part"/>
+      @partSelected="part => selectedRobot.leftArm=part"/>
       <PartSelector :parts="availableParts.torsos"
       position="center" @partSelected="part => selectedRobot.torso=part"/>
       <PartSelector :parts="availableParts.arms"
-      position="right" @partSelected="part => selectedRobot.rightArms=part"/>
+      position="right" @partSelected="part => selectedRobot.rightArm=part"/>
     </div>
     <div class="bottom-row">
       <PartSelector :parts="availableParts.bases"
@@ -66,11 +66,29 @@ import CollapsibleSection from '../shared/CollapsibleSection.vue';
 
 export default {
   name: 'RobotBuilder',
+  beforeRouteLeave(to, from, next) {
+    if (this.addedToCart) {
+      next(true);
+    } else {
+      /* eslint no-alert: 0 */
+      /* eslint no-restricted-globals: 0 */
+      const response = confirm('You have not added your robot to your cart, are you sure you want to leabe?');
+      next(response);
+    }
+  },
   components: { PartSelector, CollapsibleSection },
   data() {
     return {
       availableParts,
+      addedToCart: false,
       cart: [],
+      selectedRobot: {
+        head: {},
+        rightArm: {},
+        torso: {},
+        leftArm: {},
+        base: {},
+      },
     };
   },
   mixins: [createdHookMixin],
@@ -82,15 +100,7 @@ export default {
           : '3px solid #aaa',
       };
     },
-    selectedRobot() {
-      return {
-        head: {},
-        rightArm: {},
-        torso: {},
-        leftArm: {},
-        base: {},
-      };
-    },
+
   },
   methods: {
     addToCart() {
@@ -98,6 +108,7 @@ export default {
       const cost = robot.head.cost
       + robot.leftArm.cost + robot.torso.cost + robot.rightArm.cost + robot.base.cost;
       this.cart.push({ ...robot, cost });
+      this.addedToCart = true;
     },
 
   },
